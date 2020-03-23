@@ -1,0 +1,5 @@
+pyodbc
+flask
+flask-restful
+tenacity
+python-dotenv
