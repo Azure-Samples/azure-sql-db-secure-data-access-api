@@ -53,7 +53,7 @@ go
 insert into dbo.EvenMoreSensitiveData values
 (1, 1, 10, sysdatetime(), 'Some more secret info here'),
 (2, 1, 20, sysdatetime(), 'and here'),
-(3, 1, 30, sysdatetime(), 'and look, eve here!'),
+(3, 1, 30, sysdatetime(), 'and look, even here!'),
 (4, 2, 100, sysdatetime(), 'Nothing to see here'),
 (5, 2, 200, sysdatetime(), 'unless you look very close!')
 go
@@ -96,4 +96,43 @@ exec sys.sp_set_session_context @key = N'username', @value = 'damauri', @read_on
 go
 
 exec sys.sp_set_session_context @key = N'username', @value = 'jdoe', @read_only = 0;  
+go
+
+
+create or alter procedure web.get_sensitivedata
+as
+select
+    Id,
+    FirstName,
+    LastName,
+    json_query(ReallyImportantData) as ReallyImportantData
+from
+    dbo.SensitiveData
+for 
+    json path
+go
+
+create or alter procedure web.get_evenmoresensitivedata
+as
+select
+	s1.Id,
+	s1.FirstName,
+	s1.LastName,
+    json_query(( 
+        select 
+            s2.Id, 
+            s2.SomeData1,
+            s2.SomeData2, 
+            s2.SomeData3 
+        from 
+            dbo.[EvenMoreSensitiveData] s2 
+        where 
+            [s2].[SensitiveDataId] = [s1].[Id] 
+        for 
+            json auto
+    )) as EvenMore
+from
+    dbo.SensitiveData s1
+for
+	json path
 go

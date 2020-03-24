@@ -69,4 +69,4 @@ class EvenMoreSensitiveData(Queryable):
 
 # Create API routes
 api.add_resource(SensitiveData, '/sensitive-data')
-api.add_resource(EvenMoreSensitiveData, '/sensitive-data/super-secret')
+api.add_resource(EvenMoreSensitiveData, '/sensitive-data/more')
