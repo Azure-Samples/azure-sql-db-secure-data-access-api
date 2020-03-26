@@ -7,6 +7,13 @@ drop function if exists rls.fn_SecurityPredicate;
 drop table if exists rls.SensitiveDataPermissions;
 drop table if exists dbo.EvenMoreSensitiveData;
 drop table if exists dbo.SensitiveData;
+drop procedure if exists web.get_sensitivedata
+drop procedure if exists web.get_evenmoresensitivedata
+go
+
+drop schema if exists web;
+go
+create schema web;
 go
 
 drop schema if exists rls;
@@ -38,11 +45,14 @@ go
 
 create table rls.SensitiveDataPermissions
 (
-    UserName sysname not null,
+    UserHashId bigint not null,
     SensitiveDataId int not null foreign key references dbo.SensitiveData(Id),
     HasAccess bit not null default(0),
-    constraint pk__rls_SensitiveDataPermissions primary key clustered (UserName, SensitiveDataId)
+    constraint pk__rls_SensitiveDataPermissions primary key nonclustered (UserHashId, SensitiveDataId)
 )
+go
+
+create clustered index ixc on rls.SensitiveDataPermissions (SensitiveDataId)
 go
 
 insert into dbo.SensitiveData values
@@ -59,8 +69,8 @@ insert into dbo.EvenMoreSensitiveData values
 go
 
 insert into rls.SensitiveDataPermissions values
-('damauri', 1, 1),
-('jdoe', 2, 1)
+(-6134311, 1, 1),
+(1225328053, 2, 1)
 go
 
 create function rls.fn_securitypredicate(@SensitiveDataId int)  
@@ -73,31 +83,12 @@ select
 from
     rls.SensitiveDataPermissions
 where
-    database_principal_id() = database_principal_id('MiddleTierUser')
+    (database_principal_id() = database_principal_id('MiddleTierUser') or is_member('db_owner') = 1)
 and     
-    UserName = session_context(N'username')
+    UserHashId = cast(session_context(N'user-hash-id') as bigint)
 and
     SensitiveDataId = @SensitiveDataId
 go
-
-select * from dbo.SensitiveData
-go
-
-create security policy rls.SensitiveDataPolicy
-add filter predicate rls.fn_SecurityPredicate(Id) on dbo.SensitiveData,
-add filter predicate rls.fn_SecurityPredicate(SensitiveDataId) on dbo.EvenMoreSensitiveData
-with (state = on);  
-
-select * from dbo.SensitiveData
-select * from dbo.EvenMoreSensitiveData
-go
-
-exec sys.sp_set_session_context @key = N'username', @value = 'damauri', @read_only = 0;  
-go
-
-exec sys.sp_set_session_context @key = N'username', @value = 'jdoe', @read_only = 0;  
-go
-
 
 create or alter procedure web.get_sensitivedata
 as
@@ -136,3 +127,9 @@ from
 for
 	json path
 go
+
+create security policy rls.SensitiveDataPolicy
+add filter predicate rls.fn_SecurityPredicate(Id) on dbo.SensitiveData,
+add filter predicate rls.fn_SecurityPredicate(SensitiveDataId) on dbo.EvenMoreSensitiveData
+with (state = off);  
+
