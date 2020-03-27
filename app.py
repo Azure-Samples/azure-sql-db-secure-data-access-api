@@ -22,6 +22,7 @@ parser.add_argument('Authorization', location='headers')
 application_name = ";APP={0}".format(socket.gethostname())  
 connection_string = os.environ['SQLAZURECONNSTR_RLS'] + application_name
 
+# Base API class
 class Queryable(Resource):
     def __authorize(self):
         encoded = ""
@@ -52,7 +53,7 @@ class Queryable(Resource):
         return result, 200
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(10), retry=retry_if_exception_type(pyodbc.OperationalError), after=after_log(app.logger, logging.DEBUG))
-    def executeQueryJson(self, verb, username, payload=None):
+    def executeQueryJson(self, verb, user_hash_id, payload=None):
         result = {}  
         entity = type(self).__name__.lower()
         procedure = f"web.{verb}_{entity}"
@@ -63,7 +64,7 @@ class Queryable(Resource):
             cursor = conn.cursor()
 
             # set session context info, used by Row-Level Security
-            cursor.execute(f"EXEC sys.sp_set_session_context @key=N'user-hash-id', @value=?, @read_only=1;", username)                    
+            cursor.execute(f"EXEC sys.sp_set_session_context @key=N'user-hash-id', @value=?, @read_only=1;", user_hash_id)      
 
             if payload:
                 print("EXEC %s %s" % (procedure, json.dumps(payload)))

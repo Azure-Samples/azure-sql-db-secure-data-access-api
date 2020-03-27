@@ -1,5 +1,7 @@
-create user MiddleTierUser with password = 'a987REALLY#$%TRONGpa44w0rd';
-alter role db_owner add member MiddleTierUser;
+if (user_id('MiddleTierUser') is null)  begin
+	create user MiddleTierUser with password = 'a987REALLY#$%TRONGpa44w0rd';
+	alter role db_owner add member MiddleTierUser;
+end
 go
 
 drop security policy if exists rls.SensitiveDataPolicy;
