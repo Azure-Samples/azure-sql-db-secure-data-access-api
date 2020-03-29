@@ -11,8 +11,7 @@ location="WestUS2"
 gitSource="https://github.com/azure-samples/azure-sql-db-secure-data-access-api"
 
 # Make sure connection string variable is set
-
-if [[ -z "${SQLAZURECONNSTR_WWIF:-}" ]]; then
+if [[ -z "${SQLAZURECONNSTR_RLS:-}" ]]; then
 	echo "Plase export Azure SQL connection string:";
     echo "export SQLAZURECONNSTR_RLS\"your-connection-string-here\"";
 	exit 1;

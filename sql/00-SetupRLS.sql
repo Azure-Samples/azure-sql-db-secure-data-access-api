@@ -58,7 +58,7 @@ create clustered index ixc on rls.SensitiveDataPermissions (SensitiveDataId)
 go
 
 insert into dbo.SensitiveData values
-(1, 'Davide', 'Mauri', '{"SuperPowers":"Fly"}'),
+(1, 'Jane', 'Dean', '{"SuperPowers":"Fly"}'),
 (2, 'John', 'Doe', '{"SuperPowers":"Laser Eyes"}')
 go
 
@@ -71,8 +71,8 @@ insert into dbo.EvenMoreSensitiveData values
 go
 
 insert into rls.SensitiveDataPermissions values
-(-6134311, 1, 1),
-(1225328053, 2, 1)
+(6134311589, 1, 1), -- Jane Dean
+(1225328053, 2, 1)  -- Joen Doe
 go
 
 create function rls.fn_securitypredicate(@SensitiveDataId int)  
@@ -134,4 +134,4 @@ create security policy rls.SensitiveDataPolicy
 add filter predicate rls.fn_SecurityPredicate(Id) on dbo.SensitiveData,
 add filter predicate rls.fn_SecurityPredicate(SensitiveDataId) on dbo.EvenMoreSensitiveData
 with (state = off);  
-
+go
