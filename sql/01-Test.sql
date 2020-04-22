@@ -10,7 +10,7 @@ select * from dbo.SensitiveData
 select * from dbo.EvenMoreSensitiveData
 go
 
-exec sys.sp_set_session_context @key = N'user-hash-id', @value = -6134311, @read_only = 0;  
+exec sys.sp_set_session_context @key = N'user-hash-id', @value = 6134311589, @read_only = 0;  
 go
 
 select * from dbo.SensitiveData
