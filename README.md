@@ -22,7 +22,17 @@ Guidance on onboarding samples to docs.microsoft.com/samples: https://review.doc
 Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
 -->
 
-TDB
+An API should allow its users to securely access the data in the database used by the API itself. At the same time it also must assure that data is protected and secured from those users who doesn't have enough authorization. This is even more important when creating multi-tenant applications.
+
+Azure SQL offers an amazing feature to secure data at the database level, so that all the burden of taking care of such important and critical effort is done automatically by the database engine, so that the API code can be cleaner and easier to maintain and evolve. Not to mention better performances and improved efficiency as data will not leave the database at all, if the user has not the correct permissions.
+
+This repo guides you to the creation of a API solution, deployable in Azure, that take advantage of Azure SQL Row Level Security to create secure API using Python, Flask and JWT. The same approach could be used with .NET or any other language that allows you to connect to Azure SQL.
+
+A detailed video on how this sample work is available here:
+
+https://youtu.be/Qpv8ke8ZuQ8
+
+The sample simulate an authenticated user by passing in the JWT token (that you'll generate using the `pyjwt` tool) the hashed User Id. From a security point of view you want to make sure that a user can access only to his own data (or to the data s/he has been authorized to). 
 
 ## Install Sample Database
 
@@ -35,10 +45,6 @@ Otherwise you can restore the `rls_sample` database by using the
 `./sql/rls_sample.bacpac`. If you already know how to restore a database, great!, go on and once restore is done move on to next section. Otherwise, or if you want some scripts to help, use the following link:
 
 [How To Restore Database](https://github.com/yorek/azure-sql-db-samples#restore-wideworldimporters-database)
-
-## Enabled Row Level Security
-
-TDB
 
 If you need any help in executing the SQL script, you can find a Quickstart here: [Quickstart: Use Azure Data Studio to connect and query Azure SQL database](https://docs.microsoft.com/en-us/sql/azure-data-studio/quickstart-sql-database)
 
@@ -68,14 +74,14 @@ Linux:
 
 ```bash
 export FLASK_ENV="development"
-export SQLAZURECONNSTR_WWIF="<your-connection-string>"
+export SQLAZURECONNSTR_RLS="<your-connection-string>"
 ```
 
 Windows:
 
 ```powershell
 $Env:FLASK_ENV="development"
-$Env:SQLAZURECONNSTR_WWIF="<your-connection-string>"
+$Env:SQLAZURECONNSTR_RLS="<your-connection-string>"
 ```
 
 Your connection string is something like:
@@ -98,22 +104,72 @@ Python will start the HTTP server and when everything is up and running you'll s
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 ```
 
-Using a REST Client (like [Insomnia](https://insomnia.rest/), [Postman](https://www.getpostman.com/) or curl), you can now call your API, for example:
+Using a REST Client (like [Insomnia](https://insomnia.rest/), [Postman](https://www.getpostman.com/) or curl), you can now call your API. The API requires a Bearer Token that contains the Hashed User Id of the user you want to simulate:
+
+|User|Hashed Id|
+|---|---|
+|Jane Dean|6134311589|
+|John Doe|1225328053|
+
+the definition of who can see what is stored in the `rls.SensitiveDataPermissions` table.
+
+To generate the Bearer Token you can use the `pyjwt` that is automatically installed by the `pyjwt` python package. Use the key `mySUPERs3cr3t` to sign the JWT message.
+
+Linux:
 
 ```bash
 export token=`pyjwt --key=mySUPERs3cr3t encode iss=me exp=+600 user-hash-id=1225328053`
 curl -s -H "Authorization: Bearer ${token}" -X GET http://localhost:5000/sensitive-data/more  | jq .
 ```
 
+Windows:
+
+```powershell
+$token = pyjwt --key=mySUPERs3cr3t encode iss=me exp=+600 user-hash-id=1225328053
+(Invoke-WebRequest -Uri http://localhost:5000/sensitive-data/more -Method GET -Headers @{"Authorization"="Bearer $token"}).Content
+```
+
 and you'll get info on Customer 123:
 
 ```json
-TDB
+[
+    {
+        "Id": 1,
+        "FirstName": "Jane",
+        "LastName": "Dean",
+        "EvenMore": [...]
+    },
+    {
+        "Id": 2,
+        "FirstName": "John",
+        "LastName": "Doe",
+        "EvenMore": [...]
+    }
+]
 ```
 
-Check out more samples to test all implemented verbs here:
+As you can see, data for both users is returned, even if you are invoking the API using a specific User. This is because the Row Level Security feature is *disabled*.
 
-[cUrl Samples](./sample-usage.md)
+## Enable Row Level Security
+
+To enable to Row Level Security Policy execute the following code in the sample database:
+
+```sql
+alter security policy rls.SensitiveDataPolicy with (state = on)
+```
+
+If you try to access the same API again, you'll now see only the data for the user you are simulating:
+
+```json
+[    
+    {
+        "Id": 2,
+        "FirstName": "John",
+        "LastName": "Doe",
+        "EvenMore": [...]
+    }
+]
+```
 
 ## Debug from Visual Studio Code
 
