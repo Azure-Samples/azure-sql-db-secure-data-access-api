@@ -72,7 +72,7 @@ go
 
 insert into rls.SensitiveDataPermissions values
 (6134311589, 1, 1), -- Jane Dean
-(1225328053, 2, 1)  -- Joen Doe
+(1225328053, 2, 1)  -- John Doe
 go
 
 create function rls.fn_securitypredicate(@SensitiveDataId int)  
