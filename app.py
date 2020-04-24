@@ -63,7 +63,7 @@ class Queryable(Resource):
             conn = pyodbc.connect(connection_string)
             cursor = conn.cursor()
 
-            # set session context info, used by Row-Level Security
+            # set session context info, used by Row-Level Security            
             cursor.execute(f"EXEC sys.sp_set_session_context @key=N'user-hash-id', @value=?, @read_only=1;", user_hash_id)      
 
             if payload:
