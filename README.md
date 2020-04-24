@@ -210,10 +210,26 @@ https://docs.microsoft.com/en-us/azure/app-service/configure-common#connection-s
 
 That's why the Python code in the sample look for `SQLAZURECONNSTR_RLS` but the Shell script write the `RLS` connection string name.
 
+## Next Steps
+
+To properly secure your API you need some kind of authentication. You can use Azure Active Directory:
+
+[Microsoft Authentication Library (MSAL) for Python](https://github.com/AzureAD/microsoft-authentication-library-for-python)
+
+or some third party service like Auth0:
+
+- [Auth0 Python Web App](https://github.com/auth0-samples/auth0-python-web-app)
+- [Auth0 Python API](https://github.com/auth0-samples/auth0-python-api-samples)
+
 ## Learn more
 
-https://techcommunity.microsoft.com/t5/azure-sql-database/building-rest-api-with-python-flask-and-azure-sql/ba-p/1056637
-https://github.com/Azure-Samples/azure-sql-db-python-rest-api
+Here's some link if you want to learn more, or you are new to Python
+
+[REST API using Python, Flask and Azure SQL](https://github.com/Azure-Samples/azure-sql-db-python-rest-api)
+
+If you want to do the same in .NET, this repo is a good start:
+
+[REST API using .Net, Dapper and Azure SQL](https://github.com/Azure-Samples/azure-sql-db-dotnet-rest-api)
 
 ## Contributing
 
