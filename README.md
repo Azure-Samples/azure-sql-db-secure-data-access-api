@@ -10,7 +10,6 @@ products:
 - vs-code
 - azure-sql-database
 - azure-app-service
-- azure-app-service-web
 description: "Creating API to securely access data using Row Level Security"
 urlFragment: "azure-sql-db-secure-data-access-api"
 ---
